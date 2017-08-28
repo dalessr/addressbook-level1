@@ -540,7 +540,16 @@ public class AddressBook {
      * @return feedback display message for the operation result
      */
     private static String executeUpdatePerson(String commandArgs) {
-        return "some actions: " + commandArgs;
+        final Optional<String[]> decodeResult = decodePersonFromString(commandArgs);
+
+        if (!decodeResult.isPresent()) {
+            return getMessageForInvalidCommandInput(COMMAND_UPDATE_WORD, getUsageInfoForUpdateCommand());
+        }
+        
+        // final String[] personToAdd = decodeResult.get();
+        // addPersonToAddressBook(personToAdd);
+        // return getMessageForSuccessfulAddPerson(personToAdd);
+        return "success";
     }
 
     /**

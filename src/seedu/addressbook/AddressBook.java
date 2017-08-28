@@ -551,10 +551,10 @@ public class AddressBook {
         boolean check = updatePersonToAddressBook(personToUpdate);
 
         if (check) {
-            return getMessageForSuccessfulUpdatePerson(personToUpdate);
+            return getMessageForSuccessfulUpdatePerson(personToUpdate);  // success
         }
         else {
-            return MESSAGE_PERSON_NOT_IN_ADDRESSBOOK;
+            return MESSAGE_PERSON_NOT_IN_ADDRESSBOOK;  // not found
         }
     }
 

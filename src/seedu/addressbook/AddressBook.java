@@ -545,11 +545,17 @@ public class AddressBook {
         if (!decodeResult.isPresent()) {
             return getMessageForInvalidCommandInput(COMMAND_UPDATE_WORD, getUsageInfoForUpdateCommand());
         }
-        
-        // final String[] personToAdd = decodeResult.get();
-        // addPersonToAddressBook(personToAdd);
+
+        final String[] personToAdd = decodeResult.get();
+        boolean check = updatePersonToAddressBook(personToAdd);
         // return getMessageForSuccessfulAddPerson(personToAdd);
-        return "success";
+
+        if (check) {
+            return "AddressBook updated!";
+        }
+        else {
+            return "The name entered does not exist!";
+        }
     }
 
     /**
@@ -825,6 +831,28 @@ public class AddressBook {
     private static void addPersonToAddressBook(String[] person) {
         ALL_PERSONS.add(person);
         savePersonsToFile(getAllPersonsInAddressBook(), storageFilePath);
+    }
+
+    /**
+     * Updates a person's information into the address book. Saves changes to storage file.
+     *
+     * @param person to update
+     */
+    private static boolean updatePersonToAddressBook(String[] person) {
+        boolean check = false;
+
+        for (int i = 0; i < ALL_PERSONS.size(); i++) {
+            if (ALL_PERSONS.get(i)[0].equals(person[0])) {
+                ALL_PERSONS.remove(i);
+                ALL_PERSONS.add(i, person);
+                check = true;
+                break;
+            }
+        }
+
+        savePersonsToFile(getAllPersonsInAddressBook(), storageFilePath);
+
+        return check;
     }
 
     /**

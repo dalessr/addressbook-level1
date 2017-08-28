@@ -138,7 +138,7 @@ public class AddressBook {
                                                         + PERSON_DATA_PREFIX_PHONE + "PHONE_NUMBER "
                                                         + PERSON_DATA_PREFIX_EMAIL + "EMAIL";
     private static final String COMMAND_UPDATE_DESC = "Update the phone number or email of a person identified by name.";
-    private static final String COMMAND_UPDATE_EXAMPLE = COMMAND_UPDATE_WORD + " John Doe p/12345678";
+    private static final String COMMAND_UPDATE_EXAMPLE = COMMAND_UPDATE_WORD + " John Doe p/12345678 e/johnd@gmail.com";
 
     private static final String DIVIDER = "===================================================";
 

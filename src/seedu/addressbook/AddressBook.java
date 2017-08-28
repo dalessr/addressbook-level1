@@ -514,8 +514,14 @@ public class AddressBook {
             return MESSAGE_INVALID_PERSON_DISPLAYED_INDEX;
         }
         final String[] targetInModel = getPersonByLastVisibleIndex(targetVisibleIndex);
-        return deletePersonFromAddressBook(targetInModel) ? getMessageForSuccessfulDelete(targetInModel) // success
-                                                          : MESSAGE_PERSON_NOT_IN_ADDRESSBOOK; // not found
+
+        if (deletePersonFromAddressBook(targetInModel)) {
+            return getMessageForSuccessfulDelete(targetInModel);  // success
+        }
+        else {
+            return MESSAGE_PERSON_NOT_IN_ADDRESSBOOK; // not found
+        }
+
     }
 
     /**
@@ -932,7 +938,12 @@ public class AddressBook {
                 extractEmailFromPersonString(encoded)
         );
         // check that the constructed person is valid
-        return isPersonDataValid(decodedPerson) ? Optional.of(decodedPerson) : Optional.empty();
+        if (isPersonDataValid(decodedPerson)) {
+            return Optional.of(decodedPerson);
+        }
+        else {
+            return Optional.empty();
+        }
     }
 
     /**

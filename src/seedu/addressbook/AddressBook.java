@@ -66,6 +66,7 @@ public class AddressBook {
      * =========================================================================
      */
     private static final String MESSAGE_ADDED = "New person added: %1$s, Phone: %2$s, Email: %3$s";
+    private static final String MESSAGE_UPDATED = "Existing person updated: %1$s, Phone: %2$s, Email: %3$s";
     private static final String MESSAGE_ADDRESSBOOK_CLEARED = "Address book has been cleared!";
 
     private static final String MESSAGE_COMMAND_HELP = "%1$s: %2$s";
@@ -546,16 +547,27 @@ public class AddressBook {
             return getMessageForInvalidCommandInput(COMMAND_UPDATE_WORD, getUsageInfoForUpdateCommand());
         }
 
-        final String[] personToAdd = decodeResult.get();
-        boolean check = updatePersonToAddressBook(personToAdd);
-        // return getMessageForSuccessfulAddPerson(personToAdd);
+        final String[] personToUpdate = decodeResult.get();
+        boolean check = updatePersonToAddressBook(personToUpdate);
 
         if (check) {
-            return "AddressBook updated!";
+            return getMessageForSuccessfulUpdatePerson(personToUpdate);
         }
         else {
-            return "The name entered does not exist!";
+            return MESSAGE_PERSON_NOT_IN_ADDRESSBOOK;
         }
+    }
+
+    /**
+     * Constructs a feedback message for a successful update person command execution.
+     *
+     * @see #executeUpdatePerson(String)
+     * @param updatedPerson person who was successfully updated
+     * @return successful update person feedback message
+     */
+    private static String getMessageForSuccessfulUpdatePerson(String[] updatedPerson) {
+        return String.format(MESSAGE_UPDATED,
+                getNameFromPerson(updatedPerson), getPhoneFromPerson(updatedPerson), getEmailFromPerson(updatedPerson));
     }
 
     /**

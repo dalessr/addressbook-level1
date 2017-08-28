@@ -548,9 +548,9 @@ public class AddressBook {
         }
 
         final String[] personToUpdate = decodeResult.get();
-        boolean check = updatePersonToAddressBook(personToUpdate);
+        boolean isFound = updatePersonToAddressBook(personToUpdate);
 
-        if (check) {
+        if (isFound) {
             return getMessageForSuccessfulUpdatePerson(personToUpdate);  // success
         }
         else {
@@ -851,20 +851,20 @@ public class AddressBook {
      * @param person to update
      */
     private static boolean updatePersonToAddressBook(String[] person) {
-        boolean check = false;
+        boolean isFound = false;
 
         for (int i = 0; i < ALL_PERSONS.size(); i++) {
             if (ALL_PERSONS.get(i)[0].equals(person[0])) {
                 ALL_PERSONS.remove(i);
                 ALL_PERSONS.add(i, person);
-                check = true;
+                isFound = true;
                 break;
             }
         }
 
         savePersonsToFile(getAllPersonsInAddressBook(), storageFilePath);
 
-        return check;
+        return isFound;
     }
 
     /**

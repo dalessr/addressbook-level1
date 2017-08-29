@@ -66,7 +66,9 @@ public class AddressBook {
      * =========================================================================
      */
     private static final String MESSAGE_ADDED = "New person added: %1$s, Phone: %2$s, Email: %3$s";
+    private static final String MESSAGE_UPDATED = "Existing person updated: %1$s, Phone: %2$s, Email: %3$s";
     private static final String MESSAGE_ADDRESSBOOK_CLEARED = "Address book has been cleared!";
+
     private static final String MESSAGE_COMMAND_HELP = "%1$s: %2$s";
     private static final String MESSAGE_COMMAND_HELP_PARAMETERS = "\tParameters: %1$s";
     private static final String MESSAGE_COMMAND_HELP_EXAMPLE = "\tExample: %1$s";
@@ -132,6 +134,12 @@ public class AddressBook {
     private static final String COMMAND_EXIT_WORD = "exit";
     private static final String COMMAND_EXIT_DESC = "Exits the program.";
     private static final String COMMAND_EXIT_EXAMPLE = COMMAND_EXIT_WORD;
+    private static final String COMMAND_UPDATE_WORD = "update";
+    private static final String COMMAND_UPDATE_PARAMETER = "NAME "
+                                                        + PERSON_DATA_PREFIX_PHONE + "PHONE_NUMBER "
+                                                        + PERSON_DATA_PREFIX_EMAIL + "EMAIL";
+    private static final String COMMAND_UPDATE_DESC = "Update the phone number or email of a person identified by name.";
+    private static final String COMMAND_UPDATE_EXAMPLE = COMMAND_UPDATE_WORD + " John Doe p/12345678 e/johnd@gmail.com";
 
     private static final String DIVIDER = "===================================================";
 
@@ -369,22 +377,24 @@ public class AddressBook {
         final String commandType = commandTypeAndParams[0];
         final String commandArgs = commandTypeAndParams[1];
         switch (commandType) {
-        case COMMAND_ADD_WORD:
-            return executeAddPerson(commandArgs);
-        case COMMAND_FIND_WORD:
-            return executeFindPersons(commandArgs);
-        case COMMAND_LIST_WORD:
-            return executeListAllPersonsInAddressBook();
-        case COMMAND_DELETE_WORD:
-            return executeDeletePerson(commandArgs);
-        case COMMAND_CLEAR_WORD:
-            return executeClearAddressBook();
-        case COMMAND_HELP_WORD:
-            return getUsageInfoForAllCommands();
-        case COMMAND_EXIT_WORD:
-            executeExitProgramRequest();
-        default:
-            return getMessageForInvalidCommandInput(commandType, getUsageInfoForAllCommands());
+            case COMMAND_ADD_WORD:
+                return executeAddPerson(commandArgs);
+            case COMMAND_FIND_WORD:
+                return executeFindPersons(commandArgs);
+            case COMMAND_LIST_WORD:
+                return executeListAllPersonsInAddressBook();
+            case COMMAND_DELETE_WORD:
+                return executeDeletePerson(commandArgs);
+            case COMMAND_UPDATE_WORD:
+                return executeUpdatePerson(commandArgs);
+            case COMMAND_CLEAR_WORD:
+                return executeClearAddressBook();
+            case COMMAND_HELP_WORD:
+                return getUsageInfoForAllCommands();
+            case COMMAND_EXIT_WORD:
+                executeExitProgramRequest();
+            default:
+                return getMessageForInvalidCommandInput(commandType, getUsageInfoForAllCommands());
         }
     }
 
@@ -395,7 +405,13 @@ public class AddressBook {
      */
     private static String[] splitCommandWordAndArgs(String rawUserInput) {
         final String[] split =  rawUserInput.trim().split("\\s+", 2);
-        return split.length == 2 ? split : new String[] { split[0] , "" }; // else case: no parameters
+
+        if (split.length == 2) {
+            return split;
+        }
+        else {
+            return new String[] { split[0] , "" };
+        }
     }
 
     /**
@@ -508,8 +524,50 @@ public class AddressBook {
             return MESSAGE_INVALID_PERSON_DISPLAYED_INDEX;
         }
         final String[] targetInModel = getPersonByLastVisibleIndex(targetVisibleIndex);
-        return deletePersonFromAddressBook(targetInModel) ? getMessageForSuccessfulDelete(targetInModel) // success
-                                                          : MESSAGE_PERSON_NOT_IN_ADDRESSBOOK; // not found
+
+        if (deletePersonFromAddressBook(targetInModel)) {
+            return getMessageForSuccessfulDelete(targetInModel);  // success
+        }
+        else {
+            return MESSAGE_PERSON_NOT_IN_ADDRESSBOOK; // not found
+        }
+
+    }
+
+    /**
+     * Uodates the contact number and email of a person identified by name.
+     *
+     * @param commandArgs full command args string from the user
+     * @return feedback display message for the operation result
+     */
+    private static String executeUpdatePerson(String commandArgs) {
+        final Optional<String[]> decodeResult = decodePersonFromString(commandArgs);
+
+        if (!decodeResult.isPresent()) {
+            return getMessageForInvalidCommandInput(COMMAND_UPDATE_WORD, getUsageInfoForUpdateCommand());
+        }
+
+        final String[] personToUpdate = decodeResult.get();
+        boolean check = updatePersonToAddressBook(personToUpdate);
+
+        if (check) {
+            return getMessageForSuccessfulUpdatePerson(personToUpdate);  // success
+        }
+        else {
+            return MESSAGE_PERSON_NOT_IN_ADDRESSBOOK;  // not found
+        }
+    }
+
+    /**
+     * Constructs a feedback message for a successful update person command execution.
+     *
+     * @see #executeUpdatePerson(String)
+     * @param updatedPerson person who was successfully updated
+     * @return successful update person feedback message
+     */
+    private static String getMessageForSuccessfulUpdatePerson(String[] updatedPerson) {
+        return String.format(MESSAGE_UPDATED,
+                getNameFromPerson(updatedPerson), getPhoneFromPerson(updatedPerson), getEmailFromPerson(updatedPerson));
     }
 
     /**
@@ -788,6 +846,28 @@ public class AddressBook {
     }
 
     /**
+     * Updates a person's information into the address book. Saves changes to storage file.
+     *
+     * @param person to update
+     */
+    private static boolean updatePersonToAddressBook(String[] person) {
+        boolean check = false;
+
+        for (int i = 0; i < ALL_PERSONS.size(); i++) {
+            if (ALL_PERSONS.get(i)[0].equals(person[0])) {
+                ALL_PERSONS.remove(i);
+                ALL_PERSONS.add(i, person);
+                check = true;
+                break;
+            }
+        }
+
+        savePersonsToFile(getAllPersonsInAddressBook(), storageFilePath);
+
+        return check;
+    }
+
+    /**
      * Deletes the specified person from the addressbook if it is inside. Saves any changes to storage file.
      *
      * @param exactPerson the actual person inside the address book (exactPerson == the person to delete in the full list)
@@ -926,7 +1006,12 @@ public class AddressBook {
                 extractEmailFromPersonString(encoded)
         );
         // check that the constructed person is valid
-        return isPersonDataValid(decodedPerson) ? Optional.of(decodedPerson) : Optional.empty();
+        if (isPersonDataValid(decodedPerson)) {
+            return Optional.of(decodedPerson);
+        }
+        else {
+            return Optional.empty();
+        }
     }
 
     /**
@@ -1086,6 +1171,7 @@ public class AddressBook {
                 + getUsageInfoForFindCommand() + LS
                 + getUsageInfoForViewCommand() + LS
                 + getUsageInfoForDeleteCommand() + LS
+                + getUsageInfoForUpdateCommand() + LS
                 + getUsageInfoForClearCommand() + LS
                 + getUsageInfoForExitCommand() + LS
                 + getUsageInfoForHelpCommand();
@@ -1110,6 +1196,13 @@ public class AddressBook {
         return String.format(MESSAGE_COMMAND_HELP, COMMAND_DELETE_WORD, COMMAND_DELETE_DESC) + LS
                 + String.format(MESSAGE_COMMAND_HELP_PARAMETERS, COMMAND_DELETE_PARAMETER) + LS
                 + String.format(MESSAGE_COMMAND_HELP_EXAMPLE, COMMAND_DELETE_EXAMPLE) + LS;
+    }
+
+    /** Returns the string for showing 'update' command usage instruction */
+    private static String getUsageInfoForUpdateCommand() {
+        return String.format(MESSAGE_COMMAND_HELP, COMMAND_UPDATE_WORD, COMMAND_UPDATE_DESC) + LS
+                + String.format(MESSAGE_COMMAND_HELP_PARAMETERS, COMMAND_UPDATE_PARAMETER) + LS
+                + String.format(MESSAGE_COMMAND_HELP_EXAMPLE, COMMAND_UPDATE_EXAMPLE) + LS;
     }
 
     /** Returns string for showing 'clear' command usage instruction */

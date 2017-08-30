@@ -109,6 +109,17 @@ Examples:
   `delete 1`
   > Deletes the 1st person in the results of the `find` command.
 
+#### Updating a person: `update`
+> Updates a person to the address book
+
+Format: `update NAME p/PHONE_NUMBER e/EMAIL`  
+> Words in `UPPER_CASE` are the parameters<br>
+  Phone number and email can be in any order but the name must come first.
+
+Examples: 
+* `update John Doe p/12345678 e/johnd@gmail.com`
+* `update Betsy Crowe e/e0061362@u.nus.edu p/1234567 `  
+
 #### Clearing all entries: `clear`
 > Clears all entries from the address book.  
 Format: `clear`  

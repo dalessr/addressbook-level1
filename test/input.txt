@@ -62,6 +62,34 @@
   find Charlie Betsy
 
 ##########################################################
+# test update person command, setup state for futuer tests
+##########################################################
+
+  # should catch invalid args format
+  update wrong args wrong args
+  update Valid Name p/12345 valid@email.butNoPrefix
+  update Valid Name 12345 e/valid@email.butPhonePrefixMissing
+  
+  # should catch invalid person data
+  update []\[;] p/12345 e/valid@e.mail
+  update Valid Name p/not_numbers e/valid@e.mail
+  update Valid Name p/12345 e/notAnEmail
+
+  # should update correctly
+  update Adam Brown p/666666 e/adam@gmail.com
+  list
+  update Betsy Choo p/222222 e/betsyhoo@nus.edu.sg
+  list
+
+  # order of phone and email should not matter
+  update Charlie Dickson e/charlie.d@nus.edu.sg p/333333
+  list
+  update Dickson Ee e/dickson@nus.edu.sg p/444444
+  list
+  update Esther Potato p/555555 e/esther@notreal.potato
+  list
+
+##########################################################
 # test delete person command
 ##########################################################
 

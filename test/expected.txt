@@ -66,6 +66,10 @@
 || 	Parameters: INDEX
 || 	Example: delete 1
 || 
+|| update: Update the phone number or email of a person identified by name.
+|| 	Parameters: NAME p/PHONE_NUMBER e/EMAIL
+|| 	Example: update John Doe p/12345678 e/johnd@gmail.com
+|| 
 || clear: Clears address book permanently.
 || 	Example: clear
 || 
